@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Martin Liska, SUSE, Facebook, Inc.
+ * Copyright (c) Martin Liska, SUSE, Meta Platforms, Inc. and affiliates.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -60,7 +60,7 @@ static void *compressFile_orDie(void *data)
     CHECK_ZSTD( ZSTD_CCtx_setParameter(cctx, ZSTD_c_checksumFlag, 1) );
     ZSTD_CCtx_setParameter(cctx, ZSTD_c_nbWorkers, nbThreads);
 
-    /* This loop read from the input file, compresses that entire chunk,
+    /* This loop reads from the input file, compresses that entire chunk,
      * and writes all output produced to the output file.
      */
     size_t const toRead = buffInSize;
