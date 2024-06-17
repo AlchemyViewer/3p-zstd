@@ -4,7 +4,7 @@
     <key>package_description</key>
     <map>
       <key>canonical_repo</key>
-      <string>https://git.alchemyviewer.org/alchemy/thirdparty/3p-zstd</string>
+      <string>https://github.com/AlchemyViewer/3p-zstd</string>
       <key>copyright</key>
       <string>Copyright (c) 2016-present, Facebook, Inc. All rights reserved.</string>
       <key>description</key>
