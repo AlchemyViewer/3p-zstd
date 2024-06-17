@@ -81,20 +81,18 @@ pushd "$ZSTD_SOURCE_DIR/build/cmake"
             # deploy target
             export MACOSX_DEPLOYMENT_TARGET=${LL_BUILD_DARWIN_BASE_DEPLOY_TARGET}
 
-            mkdir -p "build_release"
-            pushd "build_release"
+            mkdir -p "build_release_x86"
+            pushd "build_release_x86"
                 CFLAGS="$C_OPTS_X86" \
                 CXXFLAGS="$CXX_OPTS_X86" \
                 LDFLAGS="$LINK_OPTS_X86" \
                 cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=OFF \
                     -DCMAKE_C_FLAGS="$C_OPTS_X86" \
                     -DCMAKE_CXX_FLAGS="$CXX_OPTS_X86" \
-                    -DCMAKE_OSX_ARCHITECTURES:STRING=x86_64 \
                     -DCMAKE_OSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET} \
                     -DCMAKE_OSX_ARCHITECTURES="x86_64" \
                     -DCMAKE_MACOSX_RPATH=YES \
-                    -DCMAKE_INSTALL_PREFIX=$stage \
-                    -DCMAKE_INSTALL_LIBDIR="$stage/lib/release" \
+                    -DCMAKE_INSTALL_PREFIX="$stage/release_x86" \
                     -DZSTD_BUILD_SHARED=OFF \
                     -DZSTD_BUILD_PROGRAMS=OFF 
 
@@ -105,6 +103,39 @@ pushd "$ZSTD_SOURCE_DIR/build/cmake"
                 #    ctest -C Release
                 #fi
             popd
+
+            mkdir -p "build_release_arm64"
+            pushd "build_release_arm64"
+                CFLAGS="$C_OPTS_ARM64" \
+                CXXFLAGS="$CXX_OPTS_ARM64" \
+                LDFLAGS="$LINK_OPTS_ARM64" \
+                cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=OFF \
+                    -DCMAKE_C_FLAGS="$C_OPTS_ARM64" \
+                    -DCMAKE_CXX_FLAGS="$CXX_OPTS_ARM64" \
+                    -DCMAKE_OSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET} \
+                    -DCMAKE_OSX_ARCHITECTURES="arm64" \
+                    -DCMAKE_MACOSX_RPATH=YES \
+                    -DCMAKE_INSTALL_PREFIX="$stage/release_arm64" \
+                    -DZSTD_BUILD_SHARED=OFF \
+                    -DZSTD_BUILD_PROGRAMS=OFF 
+
+                cmake --build . --config Release --clean-first --target install
+
+                # conditionally run unit tests
+                #if [ "${DISABLE_UNIT_TESTS:-0}" = "0" ]; then
+                #    ctest -C Release
+                #fi
+            popd
+
+            # prepare staging dirs
+            mkdir -p "$stage/include/"
+            mkdir -p "$stage/lib/release"
+
+            # create fat libraries
+            lipo -create ${stage}/release_x86/lib/libzstd.a ${stage}/release_arm64/lib/libzstd.a -output ${stage}/lib/release/libzstd.a
+
+            # copy headers
+            mv $stage/release_x86/include/* $stage/include/
         ;;
         linux*)
             # Linux build environment at Linden comes pre-polluted with stuff that can
